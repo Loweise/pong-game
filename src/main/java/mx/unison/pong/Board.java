@@ -11,6 +11,7 @@ public class Board extends JComponent implements Runnable, KeyListener {
     private Ellipse2D.Double ball;
 
     private Paddle paddle;
+    private Objectives objective;
 
     private BallRunner ballRunner;
     private boolean isPaused = false;
@@ -54,7 +55,9 @@ public class Board extends JComponent implements Runnable, KeyListener {
         if ( ballRunner.itsOver ) {
             g.setFont(theFont);
             g.setColor( Color.RED);
-            g.drawString("Game over", 30, 100);
+            g.drawString("Game over", 640/3, 480/2);
+            g.setColor(Color.BLACK);
+            g.drawString("Press spacebar to continue", 640/3, (480/2)-20);
         }
         
         
@@ -83,7 +86,7 @@ public class Board extends JComponent implements Runnable, KeyListener {
     @Override
     public void run() {
         while ( true ) {
-            if(!isPaused) {
+            if(!isPaused && !ballRunner.itsOver) {
                 paddle.update();
             }
             repaint();
@@ -102,35 +105,60 @@ public class Board extends JComponent implements Runnable, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        
         switch ( e.getKeyCode() ) {
             case KeyEvent.VK_LEFT:
-                if( !isPaused) {
+                if( !isPaused && !ballRunner.aKeyIsPressed) {
+                    ballRunner.aKeyIsPressed = true;
                     paddle.moveLeft();
                 }
                 break;
             case KeyEvent.VK_RIGHT:
-                if( !isPaused) {
+                if( !isPaused && !ballRunner.aKeyIsPressed) {
+                    ballRunner.aKeyIsPressed = true;
                     paddle.moveRight();
                 }
                 break;
             case KeyEvent.VK_SPACE:
+                if ( ballRunner.itsOver ) {
+                    restartGame();
+                    break;
+                }
+                if (isPaused) {
+                    ballRunner.resume();
+                    isPaused = false;
+                    repaint();
+                    break;
+                }
+                
                 isPaused = true;
                 ballRunner.pause();
                 break;
-            case KeyEvent.VK_R:
-                isPaused = false;
-                ballRunner.resume();
-                break;
+//            case KeyEvent.VK_R:
+//                isPaused = false;
+//                ballRunner.resume();
+//                break;
         }
        // System.out.println("K");
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
+        ballRunner.aKeyIsPressed = false;
         int key = e.getKeyCode();
         
         if (key== KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT) {
             paddle.stop();
         }
     }
+    
+    public void restartGame() {
+        ballRunner.speedRestart();
+        paddle.stop();
+        paddle.getPaddle().x = 280;
+        ballRunner = new BallRunner(ball, paddle);
+        Thread t1 = new Thread(ballRunner);
+        t1.start();
+        isPaused = false;
+}
 }

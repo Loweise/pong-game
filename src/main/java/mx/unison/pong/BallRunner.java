@@ -8,8 +8,8 @@ public class BallRunner implements Runnable {
     public static final int MAX_Y = 480;
     public static final int SIGN = -1;
 
-    public static final int DX = 5;
-    public static final int DY = 5;
+    public static int DX = 5;
+    public static int DY = 5;
     private final  Ellipse2D.Double ball;
 
     private final Paddle paddle;
@@ -19,6 +19,7 @@ public class BallRunner implements Runnable {
 
     private boolean isPaused ;
     public boolean itsOver = false;
+    public boolean aKeyIsPressed = false;
     private boolean stop = false ;
 
     public BallRunner( Ellipse2D.Double shape, Paddle p) {
@@ -39,11 +40,15 @@ public class BallRunner implements Runnable {
     public void resume() {
         isPaused = false;
     }
+    public void speedRestart() {
+        DX = 5;
+        DY = 5;
+    }
 
     @Override
     public void run() {
         int directionY = 1;
-        int directionX = 1;
+        int directionX = 0;
 
         while( !stop ) {
 
@@ -56,6 +61,12 @@ public class BallRunner implements Runnable {
            // int x = (int)  ball.getX();
 
             if( paddle.intersects(ball) ) {
+                DX++;
+                DY++;
+                if (directionX == 0) {
+                directionX = Math.random() > 0.5 ? 1 : -1; 
+            }
+                
                 directionY = directionY * SIGN;
                // sX = sX * SIGN;
                 ballX = ballX + (DX * directionX) ;
@@ -75,6 +86,7 @@ public class BallRunner implements Runnable {
             if( ball.getMaxY() > MAX_Y ) {
                 itsOver = true;
                 stop();
+                
                 
                 continue;
             }
