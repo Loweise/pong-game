@@ -11,7 +11,7 @@ public class Board extends JComponent implements Runnable, KeyListener {
     private Ellipse2D.Double ball;
 
     private Paddle paddle;
-    private Objectives objective;
+    private Objectives brick;
 
     private BallRunner ballRunner;
     private boolean isPaused = false;
@@ -28,9 +28,11 @@ public class Board extends JComponent implements Runnable, KeyListener {
         addKeyListener(this);
         
         ball = new Ellipse2D.Double(20,320,20,20);
-
         paddle = new Paddle();
-        ballRunner = new BallRunner(ball,paddle);
+        brick = new Objectives();
+        ballRunner = new BallRunner(ball, paddle, brick);
+        
+        
         Thread t1 = new Thread(ballRunner);
         t1.start();
         Thread t2 = new Thread( this);
@@ -40,6 +42,7 @@ public class Board extends JComponent implements Runnable, KeyListener {
     protected void paintComponent(Graphics graphicsContext) {
         super.paintComponent(graphicsContext);
         Graphics2D g = (Graphics2D) graphicsContext;
+        
         if (isOpaque()) {
             g.setColor( getBackground() );
             g.fillRect(0, 0, getWidth(), getHeight());
@@ -60,11 +63,19 @@ public class Board extends JComponent implements Runnable, KeyListener {
             g.drawString("Press spacebar to continue", 640/3, (480/2)-20);
         }
         
+        if ( brick.cantBricks ==0 ) {
+            g.setFont(theFont);
+            g.setColor( Color.RED);
+            g.drawString("Game win", 640/3, 480/2);
+        }
+        
         
 
         g.setStroke(new BasicStroke(5.0f));
-
+        
+        brick.draw(g);
         g.setColor(Color.RED);
+        
         g.fill(ball);
         g.setColor(Color.BLACK);
         g.fill(paddle.getPaddle());
@@ -134,12 +145,7 @@ public class Board extends JComponent implements Runnable, KeyListener {
                 isPaused = true;
                 ballRunner.pause();
                 break;
-//            case KeyEvent.VK_R:
-//                isPaused = false;
-//                ballRunner.resume();
-//                break;
         }
-       // System.out.println("K");
     }
 
     @Override
@@ -156,7 +162,7 @@ public class Board extends JComponent implements Runnable, KeyListener {
         ballRunner.speedRestart();
         paddle.stop();
         paddle.getPaddle().x = 280;
-        ballRunner = new BallRunner(ball, paddle);
+        ballRunner = new BallRunner(ball, paddle, brick);
         Thread t1 = new Thread(ballRunner);
         t1.start();
         isPaused = false;

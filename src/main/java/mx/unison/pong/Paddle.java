@@ -13,6 +13,7 @@ public class Paddle {
     private final Rectangle2D.Double paddle;
     private int pos ;
     private double dx;
+    private Objectives objectives;
 
     public Paddle() {
         super();

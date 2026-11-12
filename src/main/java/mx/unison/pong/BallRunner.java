@@ -13,7 +13,8 @@ public class BallRunner implements Runnable {
     private final  Ellipse2D.Double ball;
 
     private final Paddle paddle;
-
+    private final Objectives brick;
+    
     private int ballX;
     private int ballY;
 
@@ -21,10 +22,11 @@ public class BallRunner implements Runnable {
     public boolean itsOver = false;
     public boolean aKeyIsPressed = false;
     private boolean stop = false ;
-
-    public BallRunner( Ellipse2D.Double shape, Paddle p) {
+    
+    public BallRunner( Ellipse2D.Double shape, Paddle p, Objectives brick) {
         super();
         ball =  shape;
+        this.brick = brick;
         paddle = p;
         ballX = 320;
         ballY = 240;
@@ -57,20 +59,24 @@ public class BallRunner implements Runnable {
                continue;
             }
 
-           // int y = (int) ball.getMaxY();
-           // int x = (int)  ball.getX();
-
+                
+            int colType = brick.checkCollision(ball);
+            if (colType == 1) {
+                directionY = directionY * SIGN; 
+            } else if (colType == 2) {
+                directionX = directionX * SIGN; 
+            }
+           
             if( paddle.intersects(ball) ) {
                 DX++;
                 DY++;
-                if (directionX == 0) {
-                directionX = Math.random() > 0.5 ? 1 : -1; 
-            }
+                if(directionX == 0){
+                    directionX = Math.random() > 0.5 ? 1 : -1; 
+                }
                 
                 directionY = directionY * SIGN;
-               // sX = sX * SIGN;
                 ballX = ballX + (DX * directionX) ;
-                ballY = ballY + (DY * directionY);
+                ballY = (int) paddle.getPaddle().y - (int) ball.height;
                 ball.x = ballX ;
                 ball.y = ballY;
                 continue;
